@@ -68,7 +68,7 @@ begin
         Controller.Inserir(Req, Res, Next);
       end);
 
-    THorse.Put('/tarefas/status',
+    THorse.Put('/tarefas/:id/status',
       procedure(Req: THorseRequest; Res: THorseResponse; Next: TProc)
       begin
         Controller.AtualizarStatus(Req, Res, Next);

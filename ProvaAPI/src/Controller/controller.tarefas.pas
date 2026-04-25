@@ -69,7 +69,7 @@ begin
   end;
 
   try
-    Id := Body.GetValue<Integer>('id');
+    Id := StrToIntDef(Req.Params['id'], 0);
     Status := Body.GetValue<Integer>('status');
 
     FService.AtualizarStatus(Id, TTarefa.toStatus(Status));
@@ -98,9 +98,9 @@ var
   oJSONObject: TJSONObject;
 begin
   oJSONObject := TJSONObject.Create;
-  oJSONObject.AddPair('Total de Tarefas', TJSONNumber.Create(FService.TotalTarefas));
-  oJSONObject.AddPair('Media de Prioridade Pendentes', TJSONNumber.Create(FService.MediaPrioridadePendentes));
-  oJSONObject.AddPair('Tarefas Concluidas Ultimos 7 Dias', TJSONNumber.Create(FService.TarefasConcluidasUltimos7Dias));
+  oJSONObject.AddPair('totalTarefas', TJSONNumber.Create(FService.TotalTarefas));
+  oJSONObject.AddPair('mediaPrioridadePendentes', TJSONNumber.Create(FService.MediaPrioridadePendentes));
+  oJSONObject.AddPair('tarefasConcluidasUltimos7Dias', TJSONNumber.Create(FService.TarefasConcluidasUltimos7Dias));
 
   Res
     .Status(200)

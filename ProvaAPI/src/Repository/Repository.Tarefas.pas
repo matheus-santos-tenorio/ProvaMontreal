@@ -93,8 +93,8 @@ begin
           oTarefa.Id := oQuery.FieldByName('ID').AsInteger;
           oTarefa.Titulo := oQuery.FieldByName('TITULO').AsString;
           oTarefa.Descricao := oQuery.FieldByName('DESCRICAO').AsString;
-          oTarefa.Prioridade := TPrioridadeTarefa(oQuery.FieldByName('PRIORIDADE').AsInteger);
-          oTarefa.Status := TStatusTarefa(oQuery.FieldByName('STATUS').AsInteger);
+          oTarefa.Prioridade := TTarefa.toPrioridade(oQuery.FieldByName('PRIORIDADE').AsInteger);
+          oTarefa.Status := TTarefa.toStatus(oQuery.FieldByName('STATUS').AsInteger);
           oTarefa.DataCriacao := oQuery.FieldByName('DATA_CRIACAO').AsDateTime;
 
           if not oQuery.FieldByName('DATA_CONCLUSAO').IsNull then
