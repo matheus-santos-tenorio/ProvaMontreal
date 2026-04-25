@@ -5,10 +5,12 @@ interface
 uses
   System.Generics.Collections,
   model.tarefas,
-  Servicer.ApiTarefas.Contracts;
+  Servicer.ApiTarefas.Contracts, REST.Client;
 
 type
   TApiTarefasService = class(TInterfacedObject, IApiTarefasService)
+  private
+    procedure ConfigurarSeguranca(pRequest: TRESTRequest);
   public
     /// <summary>
     /// Retorna todas as tarefas cadastradas.
@@ -37,7 +39,7 @@ type
 implementation
 
 uses
- System.JSON, System.SysUtils, REST.Client, REST.Types;
+ System.JSON, System.SysUtils, REST.Types;
 
 function TApiTarefasService.AtualizarStatus(pId: Integer;
   pNovoStatus: TStatusTarefa): TApiResult;
@@ -57,6 +59,7 @@ begin
 
       oRequest.Resource := Format('tarefas/%d/status', [pId]);
       oRequest.Method := rmPUT;
+      ConfigurarSeguranca(oRequest);
 
       oRequest.AddBody(Format('{"status":"%d"}', [Ord(pNovoStatus)]), ctAPPLICATION_JSON);
 
@@ -111,6 +114,7 @@ begin
 
       oRequest.Resource := 'tarefas';
       oRequest.Method := rmPOST;
+      ConfigurarSeguranca(oRequest);
 
 
       oJSONObject := TJSONObject.Create;
@@ -172,32 +176,38 @@ begin
   oRequest := TRESTRequest.Create(nil);
   oResponse := TRESTResponse.Create(nil);
   try
-    oRequest.Client := oClient;
-    oRequest.Response := oResponse;
-
-    oRequest.Resource := 'tarefas';
-    oRequest.Method := rmGET;
-
-    oRequest.Execute;
-
-    if oResponse.StatusCode <> 200 then
-      Exit;
-
-    oJsonArray := TJSONObject.ParseJSONValue(oResponse.Content) as TJSONArray;
     try
-      for oItem in oJsonArray do
-      begin
-        oTarefa := TTarefa.Create;
-        oTarefa.Id := oItem.GetValue<Integer>('id');
-        oTarefa.titulo := oItem.GetValue<string>('titulo');
-        oTarefa.descricao := oItem.GetValue<string>('descricao');
-        oTarefa.prioridade := TTarefa.toPrioridade(oItem.GetValue<Integer>('prioridade'));
-        oTarefa.status := TTarefa.toStatus(oItem.GetValue<Integer>('status'));
+      oRequest.Client := oClient;
+      oRequest.Response := oResponse;
 
-        Result.Add(oTarefa);
+      oRequest.Resource := 'tarefas';
+      oRequest.Method := rmGET;
+      ConfigurarSeguranca(oRequest);
+
+      oRequest.Execute;
+
+      if oResponse.StatusCode <> 200 then
+        Exit;
+
+      oJsonArray := TJSONObject.ParseJSONValue(oResponse.Content) as TJSONArray;
+      try
+        for oItem in oJsonArray do
+        begin
+          oTarefa := TTarefa.Create;
+          oTarefa.Id := oItem.GetValue<Integer>('id');
+          oTarefa.titulo := oItem.GetValue<string>('titulo');
+          oTarefa.descricao := oItem.GetValue<string>('descricao');
+          oTarefa.prioridade := TTarefa.toPrioridade(oItem.GetValue<Integer>('prioridade'));
+          oTarefa.status := TTarefa.toStatus(oItem.GetValue<Integer>('status'));
+
+          Result.Add(oTarefa);
+        end;
+      finally
+        oJsonArray.Free;
       end;
-    finally
-      oJsonArray.Free;
+    except
+      on E: Exception do
+        raise Exception.Create('Exceção: ' + E.Message);
     end;
 
   finally
@@ -205,6 +215,11 @@ begin
     oResponse.Free;
     oClient.Free;
   end;
+end;
+
+procedure TApiTarefasService.ConfigurarSeguranca(pRequest: TRESTRequest);
+begin
+  pRequest.Params.AddItem('X-API-KEY', 'MONTREAL-SEGURA-2026', pkHTTPHEADER, [poDoNotEncode]);
 end;
 
 function TApiTarefasService.Estatisticas: String;
@@ -225,6 +240,7 @@ begin
 
     oRequest.Resource := 'tarefas/estatisticas';
     oRequest.Method := rmGET;
+    ConfigurarSeguranca(oRequest);
 
     oRequest.Execute;
 
@@ -263,6 +279,7 @@ begin
 
       oRequest.Resource := Format('tarefas/%d', [pId]);
       oRequest.Method := rmDELETE;
+      ConfigurarSeguranca(oRequest);
 
       oRequest.Execute;
 
