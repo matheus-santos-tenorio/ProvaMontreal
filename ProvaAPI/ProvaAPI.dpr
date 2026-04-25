@@ -51,6 +51,9 @@ begin
         end;
       end);
 
+    // Middleware de segurança (API KEY)
+    RegistrarApiKeyMiddleware;
+
     // INSTÂNCIA SINGLETON
     Service := TTarefaService.Create(TTarefaRepository.Create(TConexaoFactory.Create));
     Controller := TTarefaController.Create(Service);
