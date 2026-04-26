@@ -1,19 +1,23 @@
-unit Presenter.ApiTarefas.Contracts;
+unit Service.ApiTarefas.Contracts;
 
 interface
 
 uses
-  System.Generics.Collections, Model.Tarefas, Service.ApiTarefas.Contracts;
+  Model.Tarefas, System.Generics.Collections;
 
 type
-  ITarefaPresenter = interface['{C5BB5945-3E82-418B-8AE7-66265519B66C}']
+  TApiResult = record
+    Success: Boolean;
+    Message: string;
+  end;
+
+  IApiTarefasService = interface['{16D6F188-526B-46CA-9C0F-44229DE46AD2}']
     function Listar: TObjectList<TTarefa>;
     function Inserir(pTarefa: TTarefa): TApiResult;
     function AtualizarStatus(pId: Integer; pNovoStatus: TStatusTarefa): TApiResult;
     function Remover(pId: Integer): TApiResult;
     function Estatisticas: string;
   end;
-
 
 implementation
 

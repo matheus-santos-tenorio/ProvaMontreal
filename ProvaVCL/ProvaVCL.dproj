@@ -130,13 +130,11 @@
             <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="Utils\uConstantes.pas"/>
-        <DCCReference Include="Utils\uExceptions.pas"/>
-        <DCCReference Include="Utils\uLogger.pas"/>
         <DCCReference Include="Model\model.tarefas.pas"/>
-        <DCCReference Include="Servicer\Servicer.ApiTarefas.pas"/>
+        <DCCReference Include="Service\Service.ApiTarefas.pas"/>
         <DCCReference Include="Presenter\Presenter.ApiTarefas.pas"/>
         <DCCReference Include="Presenter\Presenter.ApiTarefas.Contracts.pas"/>
-        <DCCReference Include="Servicer\Servicer.ApiTarefas.Contracts.pas"/>
+        <DCCReference Include="Service\Service.ApiTarefas.Contracts.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -163,6 +161,12 @@
                 </Excluded_Packages>
             </Delphi.Personality>
             <Deployment Version="4">
+                <DeployFile LocalName="Win32\Debug\ProvaVCL.exe" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>ProvaVCL.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile LocalName="Win32\Debug\ProvaVCL.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>ProvaVCL.exe</RemoteName>

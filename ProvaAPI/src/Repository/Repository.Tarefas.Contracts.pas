@@ -22,7 +22,7 @@ type
     /// <summary>
     /// Atualiza o status de uma tarefa existente.
     /// </summary>
-    procedure AtualizarStatus(AId: Integer; ANovoStatus: TStatusTarefa);
+    procedure AtualizarStatus(pId: Integer; pNovoStatus: TStatusTarefa);
     /// <summary>
     /// Remove uma tarefa pelo identificador.
     /// </summary>

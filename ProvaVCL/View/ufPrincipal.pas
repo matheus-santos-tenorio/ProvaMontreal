@@ -1,15 +1,12 @@
-unit ufPrincipal;
+ï»¿unit ufPrincipal;
 
 interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Menus, FireDAC.Stan.Intf,
-  FireDAC.Stan.Option, FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS,
-  FireDAC.Phys.Intf, FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt,
-  Data.DB, FireDAC.Comp.DataSet, FireDAC.Comp.Client, uLogger,
-  Vcl.Buttons, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.Grids, Vcl.DBGrids,
-  Presenter.ApiTarefas, Servicer.ApiTarefas.Contracts;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Menus,
+  Vcl.Buttons, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.Grids,
+  Presenter.ApiTarefas, Presenter.ApiTarefas.Contracts, Service.ApiTarefas.Contracts;
 
 type
   TfPrincipal = class(TForm)
@@ -71,8 +68,9 @@ type
     procedure btnRemSalvarClick(Sender: TObject);
     procedure btnRemLimparClick(Sender: TObject);
     procedure btnAltLimparClick(Sender: TObject);
+    destructor Destroy; override;
   private
-    FPresenter: TTarefasPresenter;
+    FPresenter: ITarefaPresenter;
     FRetorno: TApiResult;
     procedure ListarTarefas;
     procedure ConfigurarGrid;
@@ -128,17 +126,26 @@ var
   oTarefa: TTarefa;
 begin
   oTarefa := TTarefa.Create;
+  try
+    oTarefa.Titulo := edtCadTitulo.Text;
+    oTarefa.Descricao := edtCadDescricao.Text;
+    oTarefa.Prioridade := TTarefa.toPrioridade(cmbCadPrioridade.ItemIndex);
+    oTarefa.Status := TTarefa.toStatus(rgCadStatus.ItemIndex);
 
-  oTarefa.Titulo := edtCadTitulo.Text;
-  oTarefa.Descricao := edtCadDescricao.Text;
-  oTarefa.Prioridade := TTarefa.toPrioridade(cmbCadPrioridade.ItemIndex);
-  oTarefa.Status := TTarefa.toStatus(rgCadStatus.ItemIndex);
-
-  FRetorno := FPresenter.Inserir(oTarefa);
+    FRetorno := FPresenter.Inserir(oTarefa);
+  finally
+    oTarefa.Free;
+  end;
 
   memCadMensagem.Text := FRetorno.Message;
   if FRetorno.Success then
     btnCadLimpar.Click;
+end;
+
+destructor TfPrincipal.Destroy;
+begin
+  FPresenter := nil;
+  inherited;
 end;
 
 procedure TfPrincipal.btnEstatisticasClick(Sender: TObject);
@@ -174,23 +181,25 @@ end;
 
 procedure TfPrincipal.ConfigurarGrid;
 begin
-  sgListar.ColCount := 5;
+  sgListar.ColCount := 7;
   sgListar.RowCount := 2;
   sgListar.FixedRows := 1;
 
-  // títulos
   sgListar.Cells[0, 0] := 'ID';
   sgListar.Cells[1, 0] := 'Titulo';
-  sgListar.Cells[2, 0] := 'Descrição';
+  sgListar.Cells[2, 0] := 'DescriÃ§Ã£o';
   sgListar.Cells[3, 0] := 'Prioridade';
   sgListar.Cells[4, 0] := 'Status';
+  sgListar.Cells[5, 0] := 'Data de criaÃ§Ã£o';
+  sgListar.Cells[6, 0] := 'Data de conclusÃ£o';
 
-  // largura das colunas
-  sgListar.ColWidths[0] := 50;   // ID
-  sgListar.ColWidths[1] := 330;  // Titulo
-  sgListar.ColWidths[2] := 328;  // Descrição
-  sgListar.ColWidths[3] := 150;  // Prioridade
-  sgListar.ColWidths[4] := 150;  // Status
+  sgListar.ColWidths[0] := 45;
+  sgListar.ColWidths[1] := 251;
+  sgListar.ColWidths[2] := 255;
+  sgListar.ColWidths[3] := 95;
+  sgListar.ColWidths[4] := 110;
+  sgListar.ColWidths[5] := 125;
+  sgListar.ColWidths[6] := 125;
 end;
 
 procedure TfPrincipal.FormCreate(Sender: TObject);
@@ -211,7 +220,16 @@ var
   I: Integer;
   lTarefas: TObjectList<TTarefa>;
 begin
-  lTarefas := FPresenter.Listar;
+  try
+    lTarefas := FPresenter.Listar;
+  except
+    on E: Exception do
+    begin
+      ShowMessage('Nao foi possivel carregar a lista de tarefas.' + sLineBreak + sLineBreak + E.Message);
+      sgListar.RowCount := 2;
+      Exit;
+    end;
+  end;
   try
     sgListar.RowCount := lTarefas.Count + 1;
 
@@ -222,6 +240,14 @@ begin
       sgListar.Cells[2, I + 1] := lTarefas[I].Descricao;
       sgListar.Cells[3, I + 1] := TTarefa.toPrioridade(lTarefas[I].Prioridade);
       sgListar.Cells[4, I + 1] := TTarefa.toStatus(lTarefas[I].Status);
+      if lTarefas[I].DataCriacao <> 0 then
+        sgListar.Cells[5, I + 1] := FormatDateTime('dd/mm/yyyy hh:nn', lTarefas[I].DataCriacao)
+      else
+        sgListar.Cells[5, I + 1] := '';
+      if lTarefas[I].DataConclusao <> 0 then
+        sgListar.Cells[6, I + 1] := FormatDateTime('dd/mm/yyyy hh:nn', lTarefas[I].DataConclusao)
+      else
+        sgListar.Cells[6, I + 1] := '';
     end;
   finally
     lTarefas.Free;

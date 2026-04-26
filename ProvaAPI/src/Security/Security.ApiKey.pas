@@ -1,6 +1,12 @@
-unit Security.ApiKey;
+ï»¿unit Security.ApiKey;
 
 interface
+
+uses
+  System.SysUtils;
+
+type
+  EApiUnauthorized = class(Exception);
 
 procedure RegistrarApiKeyMiddleware;
 
@@ -8,17 +14,16 @@ implementation
 
 uses
   Horse,
-  System.JSON,
-  System.SysUtils;
+  uConstantes;
 
-procedure ValidarApiKey(Req: THorseRequest; Res: THorseResponse; Next: TProc);
+procedure ValidarApiKey(pReq: THorseRequest; pRes: THorseResponse; Next: TProc);
 var
   ApiKey: string;
 begin
-  ApiKey := Req.Headers['X-API-KEY'];
+  ApiKey := pReq.Headers[API_KEY_HEADER];
 
-  if ApiKey <> 'MONTREAL-SEGURA-2026' then
-    raise Exception.Create('Acesso não autorizado');
+  if ApiKey <> API_KEY_VALUE then
+    raise EApiUnauthorized.Create('Acesso nao autorizado');
 
   Next;
 end;

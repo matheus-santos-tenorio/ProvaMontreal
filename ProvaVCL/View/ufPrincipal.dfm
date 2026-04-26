@@ -2,6 +2,7 @@ object fPrincipal: TfPrincipal
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
   Caption = 'Principal'
   ClientHeight = 482
   ClientWidth = 1043
@@ -22,7 +23,6 @@ object fPrincipal: TfPrincipal
     Height = 145
     Align = alTop
     TabOrder = 0
-    ExplicitTop = 0
     object btnListar: TBitBtn
       Left = 8
       Top = 13
@@ -2696,20 +2696,15 @@ object fPrincipal: TfPrincipal
     Height = 289
     Align = alClient
     TabOrder = 1
-    ExplicitLeft = 280
-    ExplicitTop = 184
-    ExplicitWidth = 185
-    ExplicitHeight = 41
     object pcMenu: TPageControl
       Left = 1
       Top = 1
       Width = 1041
       Height = 287
-      ActivePage = tsRemover
+      ActivePage = tsListar
       Align = alClient
       Style = tsButtons
       TabOrder = 0
-      ExplicitHeight = 398
       object tsListar: TTabSheet
         Caption = 'Listar'
         object sgListar: TStringGrid
@@ -2719,7 +2714,6 @@ object fPrincipal: TfPrincipal
           Height = 256
           Align = alClient
           TabOrder = 0
-          ExplicitHeight = 209
         end
       end
       object tsCadastrar: TTabSheet
@@ -3017,7 +3011,6 @@ object fPrincipal: TfPrincipal
           Height = 256
           Align = alLeft
           TabOrder = 0
-          ExplicitLeft = -6
           object Label7: TLabel
             Left = 9
             Top = 64
@@ -3069,10 +3062,6 @@ object fPrincipal: TfPrincipal
           Align = alClient
           ReadOnly = True
           TabOrder = 1
-          ExplicitLeft = 1
-          ExplicitTop = 1
-          ExplicitWidth = 670
-          ExplicitHeight = 207
         end
       end
       object tsEstatisticas: TTabSheet

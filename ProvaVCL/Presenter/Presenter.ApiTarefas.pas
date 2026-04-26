@@ -5,39 +5,20 @@ interface
 uses
   System.Generics.Collections,
   Model.Tarefas,
-  Servicer.ApiTarefas,
-  Presenter.ApiTarefas.Contracts, Servicer.ApiTarefas.Contracts;
+  Service.ApiTarefas,
+  Presenter.ApiTarefas.Contracts, Service.ApiTarefas.Contracts;
 
 type
   TTarefasPresenter = class(TInterfacedObject, ITarefaPresenter)
   private
-    FService: TApiTarefasService;
+    FService: IApiTarefasService;
   public
-    constructor Create;
-    destructor Destroy; override;
-
-    /// <summary>
-    /// Retorna todas as tarefas cadastradas.
-    /// </summary>
+    constructor Create(const pService: IApiTarefasService = nil);
     function Listar: TObjectList<TTarefa>;
-    /// <summary>
-    /// Realiza o cadastro de uma nova tarefa.
-    /// </summary>
     function Inserir(pTarefa: TTarefa): TApiResult;
-    /// <summary>
-    /// Atualiza o status de uma tarefa existente.
-    /// </summary>
     function AtualizarStatus(pId: Integer; pNovoStatus: TStatusTarefa): TApiResult;
-    /// <summary>
-    /// Remove uma tarefa pelo identificador.
-    /// </summary>
     function Remover(pId: Integer): TApiResult;
-    /// <summary>
-    /// Retorna o total de tarefas cadastradas.
-    /// Retorna a média de prioridade das tarefas pendentes.
-    /// Retorna a quantidade de tarefas concluídas nos últimos 7 dias.    ///
-    /// </summary>
-    function Estatisticas: String;
+    function Estatisticas: string;
   end;
 
 implementation
@@ -48,15 +29,12 @@ begin
   Result := FService.AtualizarStatus(pId, pNovoStatus);
 end;
 
-constructor TTarefasPresenter.Create;
+constructor TTarefasPresenter.Create(const pService: IApiTarefasService);
 begin
-  FService := TApiTarefasService.Create;
-end;
-
-destructor TTarefasPresenter.Destroy;
-begin
-  FService.Free;
-  inherited;
+  if Assigned(pService) then
+    FService := pService
+  else
+    FService := TApiTarefasService.Create;
 end;
 
 function TTarefasPresenter.Inserir(pTarefa: TTarefa): TApiResult;
@@ -69,7 +47,7 @@ begin
   Result := FService.Listar;
 end;
 
-function TTarefasPresenter.Estatisticas: String;
+function TTarefasPresenter.Estatisticas: string;
 begin
   Result := FService.Estatisticas;
 end;

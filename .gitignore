@@ -1,11 +1,39 @@
-*.~*
-.svn
-*.local
+# Delphi / RAD Studio
 *.dcu
-build/*.*
-CodeCoverage/CodeCoverage.drc
-*.drc
+*.dcp
+*.bpl
+*.bpi
+*.hpp
+*.obj
+*.exe
+*.dll
+*.dll.*
+*.stat
+*.local
 *.identcache
+*.otares
+*.tvsconfig
+*.skincfg
+*.rsm
+*.map
+__recovery/
+__history/
+
+# Saídas de compilação (DCC_ExeOutput padrao .\$(Platform)\$(Config))
+ProvaAPI/Win32/
+ProvaAPI/Win64/
+ProvaVCL/Win32/
+ProvaVCL/Win64/
+
+# Debug / backup
+*.~*
+*.bak
+
+# Outros (já existentes no repositório)
+.svn
+build/*.*
 build/*/*.*
 build/*/*/*.*
+CodeCoverage/CodeCoverage.drc
+*.drc
 dunit.ini

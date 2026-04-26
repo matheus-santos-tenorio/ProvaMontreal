@@ -17,7 +17,7 @@ type
   TPrioridadeTarefa = (ptBaixa, ptMedia, ptAlta, ptUrgente, ptCritica);
 
   /// <summary>
-  /// Implementação da API Tarefa
+  /// Modelo de dominio da tarefa (espelha contrato JSON da API).
   /// </summary>
   TTarefa = class
   private
@@ -73,7 +73,7 @@ begin
     3: Result := ptUrgente;
     4: Result := ptCritica;
   else
-    raise Exception.Create('Prioridade inválida');
+    raise Exception.Create('Prioridade invalida');
   end;
 end;
 
@@ -87,7 +87,7 @@ begin
     ptUrgente: Result := 'Urgente';
     ptCritica: Result := 'Critica';
   else
-    raise Exception.Create('Prioridade inválida');
+    raise Exception.Create('Prioridade invalida');
   end;
 end;
 
@@ -98,7 +98,7 @@ begin
     1: Result := stEmAndamento;
     2: Result := stConcluida;
   else
-    raise Exception.Create('Status inválido');
+    raise Exception.Create('Status invalido');
   end;
 end;
 
@@ -109,7 +109,7 @@ begin
     stEmAndamento: Result := 'Em Andamento';
     stConcluida: Result := 'Concluida';
   else
-    raise Exception.Create('Status inválido');
+    raise Exception.Create('Status invalido');
   end;
 end;
 

@@ -1,19 +1,25 @@
--- CRIAÇÃO BASE DADOS
-CREATE DATABASE prova;
+-- Criacao do banco e da tabela TAREFAS (SQL Server)
+-- PRIORIDADE: 0 Baixa, 1 Media, 2 Alta, 3 Urgente, 4 Critica
+-- STATUS: 0 Pendente, 1 Em andamento, 2 Concluida
+-- DATA_CONCLUSAO: preenchida pela API ao concluir tarefa; usada nas estatisticas (ultimos 7 dias)
+
+IF DB_ID(N'prova') IS NULL
+  CREATE DATABASE prova;
 GO
 
--- UTILIZAÇÃO DA BASE
 USE prova;
 GO
 
--- CRIAÇÃO DA TABELA
-CREATE TABLE TAREFAS (
-    ID INT IDENTITY(1,1) PRIMARY KEY,
-    TITULO VARCHAR(200) NOT NULL,
-    DESCRICAO VARCHAR(500),
-    PRIORIDADE INT NOT NULL,
-    STATUS INT NOT NULL,
-    DATA_CRIACAO DATETIME NOT NULL DEFAULT GETDATE(),
-    DATA_CONCLUSAO DATETIME NULL
-);
+IF OBJECT_ID(N'dbo.tarefas', N'U') IS NULL
+BEGIN
+  CREATE TABLE dbo.tarefas (
+    ID              INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_TAREFAS PRIMARY KEY,
+    TITULO          NVARCHAR(200)   NOT NULL,
+    DESCRICAO       NVARCHAR(1000)  NOT NULL,
+    PRIORIDADE      INT             NOT NULL,
+    STATUS          INT             NOT NULL,
+    DATA_CRIACAO    DATETIME2       NOT NULL CONSTRAINT DF_TAREFAS_DATA_CRIACAO DEFAULT SYSDATETIME(),
+    DATA_CONCLUSAO  DATETIME2       NULL
+  );
+END
 GO

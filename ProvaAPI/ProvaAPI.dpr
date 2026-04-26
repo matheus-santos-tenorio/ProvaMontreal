@@ -10,25 +10,38 @@ uses
   System.Win.ComObj,
   Winapi.ActiveX,
   System.JSON,
-  controller.tarefas in 'src\Controller\controller.tarefas.pas',
+  Controller.Tarefas in 'src\Controller\controller.tarefas.pas',
   Factory.Conexao.Contracts in 'src\Factory\Factory.Conexao.Contracts.pas',
   Factory.Conexao in 'src\Factory\Factory.Conexao.pas',
-  model.tarefas in 'src\Model\model.tarefas.pas',
+  Model.Tarefas in 'src\Model\model.tarefas.pas',
   Repository.Tarefas.Contracts in 'src\Repository\Repository.Tarefas.Contracts.pas',
   Repository.Tarefas in 'src\Repository\Repository.Tarefas.pas',
   Routes.Tarefas in 'src\Routes\Routes.Tarefas.pas',
   Security.ApiKey in 'src\Security\Security.ApiKey.pas',
   Service.Tarefas.Contracts in 'src\Service\Service.Tarefas.Contracts.pas',
   Service.Tarefas in 'src\Service\Service.Tarefas.pas',
+  Api.Exceptions in 'src\Utils\Api.Exceptions.pas',
   uConstantes in 'src\Utils\uConstantes.pas';
 
 var
   Service: ITarefaService;
   Controller: TTarefaController;
 
+procedure EnviarErroJson(const Res: THorseResponse; const AStatusCode: Integer; const AMessage: string);
+var
+  ErrorJson: TJSONObject;
+begin
+  ErrorJson := TJSONObject.Create;
+  try
+    ErrorJson.AddPair('error', AMessage);
+    Res.Status(AStatusCode).Send(ErrorJson.ToString);
+  finally
+    ErrorJson.Free;
+  end;
+end;
+
 begin
   try
-    // MIDDLEWARE GLOBAL
     THorse.Use(
       procedure(Req: THorseRequest; Res: THorseResponse; Next: TProc)
       begin
@@ -37,59 +50,32 @@ begin
           try
             Next;
           except
+            on E: EApiUnauthorized do
+              EnviarErroJson(Res, 401, 'Acesso nao autorizado');
+            on E: EValidationException do
+              EnviarErroJson(Res, 400, E.Message);
+            on E: ENotFoundException do
+              EnviarErroJson(Res, 404, E.Message);
+            on E: EBusinessRuleException do
+              EnviarErroJson(Res, 422, E.Message);
+            on E: ERepositoryException do
+              EnviarErroJson(Res, 500, E.Message);
             on E: Exception do
-            begin
-              Res
-                .Status(500)
-                .Send(TJSONObject.Create
-                      .AddPair('error', E.Message)
-                      .ToString);
-            end;
+              EnviarErroJson(Res, 500, 'Erro interno inesperado');
           end;
         finally
           CoUninitialize;
         end;
       end);
 
-    // Middleware de segurança (API KEY)
     RegistrarApiKeyMiddleware;
 
-    // INSTÂNCIA SINGLETON
     Service := TTarefaService.Create(TTarefaRepository.Create(TConexaoFactory.Create));
     Controller := TTarefaController.Create(Service);
 
-    // ROTAS
-    THorse.Get('/tarefas',
-      procedure(Req: THorseRequest; Res: THorseResponse; Next: TProc)
-      begin
-        Controller.Listar(Req, Res, Next);
-      end);
+    RegistrarRotasTarefas(Controller);
 
-    THorse.Post('/tarefas',
-      procedure(Req: THorseRequest; Res: THorseResponse; Next: TProc)
-      begin
-        Controller.Inserir(Req, Res, Next);
-      end);
-
-    THorse.Put('/tarefas/:id/status',
-      procedure(Req: THorseRequest; Res: THorseResponse; Next: TProc)
-      begin
-        Controller.AtualizarStatus(Req, Res, Next);
-      end);
-
-    THorse.Delete('/tarefas/:id',
-      procedure(Req: THorseRequest; Res: THorseResponse; Next: TProc)
-      begin
-        Controller.Remover(Req, Res, Next);
-      end);
-
-    THorse.Get('/tarefas/estatisticas',
-      procedure(Req: THorseRequest; Res: THorseResponse; Next: TProc)
-      begin
-        Controller.Estatisticas(Req, Res, Next);
-      end);
-
-    THorse.Listen(9000);
+    THorse.Listen(API_PORT);
   except
     on E: Exception do
       Writeln(E.ClassName, ': ', E.Message);

@@ -1,4 +1,4 @@
-unit Repository.Tarefas;
+ï»¿unit Repository.Tarefas;
 
 interface
 
@@ -11,7 +11,7 @@ uses
 
 type
   /// <summary>
-  /// Implementação das operações de persistência
+  /// ImplementaÃ§Ã£o das operaÃ§Ãµes de persistencia
   /// </summary>
   TTarefaRepository = class(TInterfacedObject, ITarefaRepository)
   private
@@ -19,9 +19,9 @@ type
 
   public
     /// <summary>
-    /// Construtor responsável por receber a factory de conexão com o banco.
+    /// Construtor responsavel por receber a factory de conexÃ£o com o banco.
     /// </summary>
-    constructor Create(AConexaoFactory: IConexaoFactory);
+    constructor Create(pConexaoFactory: IConexaoFactory);
     /// <summary>
     /// Retorna todas as tarefas cadastradas.
     /// </summary>
@@ -39,15 +39,15 @@ type
     /// </summary>
     procedure Remover(pId: Integer);
     /// <summary>
-    /// Retorna o número total de tarefas.
+    /// Retorna o numero total de tarefas.
     /// </summary>
     function TotalTarefas: Integer;
     /// <summary>
-    /// Retorna a média de prioridade das tarefas pendentes.
+    /// Retorna a media de prioridade das tarefas pendentes.
     /// </summary>
     function MediaPrioridadePendentes: Double;
     /// <summary>
-    /// Retorna a quantidade de tarefas concluídas nos últimos 7 dias.
+    /// Retorna a quantidade de tarefas concluidas nos ultimos 7 dias.
     /// </summary>
     function TarefasConcluidasUltimos7Dias: Integer;
   end;
@@ -55,14 +55,14 @@ type
 implementation
 
 uses
-  Data.DB, Data.Win.ADODB;
+  Data.DB, Data.Win.ADODB, Api.Exceptions, System.Variants;
 
 { TTarefaRepository }
 
-constructor TTarefaRepository.Create(AConexaoFactory: IConexaoFactory);
+constructor TTarefaRepository.Create(pConexaoFactory: IConexaoFactory);
 begin
   inherited Create;
-  FConexaoFactory := AConexaoFactory;
+  FConexaoFactory := pConexaoFactory;
 end;
 
 function TTarefaRepository.Listar: TObjectList<TTarefa>;
@@ -113,8 +113,13 @@ begin
       Result := oListaTarefas;
 
     except
-      oListaTarefas.Free;
-      raise Exception.Create('Erro ao listar tarefas.');
+      on E: ERepositoryException do
+        raise;
+      on E: Exception do
+      begin
+        oListaTarefas.Free;
+        raise ERepositoryException.Create('Erro ao listar tarefas. Detalhe: ' + E.Message);
+      end;
     end;
 
   finally
@@ -134,8 +139,8 @@ begin
   try
     try
       oQuery.Connection := oConexao;
-      oQuery.SQL.Text := 'INSERT INTO TAREFAS (TITULO, DESCRICAO, PRIORIDADE, STATUS, DATA_CRIACAO) ' +
-                         'VALUES (:pTITULO, :pDESCRICAO, :pPRIORIDADE, :pSTATUS, :pDATA_CRIACAO)';
+      oQuery.SQL.Text := 'INSERT INTO TAREFAS (TITULO, DESCRICAO, PRIORIDADE, STATUS, DATA_CRIACAO, DATA_CONCLUSAO) ' +
+                         'VALUES (:pTITULO, :pDESCRICAO, :pPRIORIDADE, :pSTATUS, :pDATA_CRIACAO, :pDATA_CONCLUSAO)';
 
       oQuery.Parameters.ParamByName('pTITULO').Value := pTarefa.Titulo;
       oQuery.Parameters.ParamByName('pDESCRICAO').Value := pTarefa.Descricao;
@@ -143,10 +148,18 @@ begin
       oQuery.Parameters.ParamByName('pSTATUS').Value := Integer(pTarefa.Status);
       oQuery.Parameters.ParamByName('pDATA_CRIACAO').Value := pTarefa.DataCriacao;
 
+      if pTarefa.Status = stConcluida then
+        oQuery.Parameters.ParamByName('pDATA_CONCLUSAO').Value := pTarefa.DataConclusao
+      else
+        oQuery.Parameters.ParamByName('pDATA_CONCLUSAO').Value := Null;
+
       oQuery.ExecSQL;
 
     except
-      raise Exception.Create('Erro ao inserir tarefa.');
+      on E: ERepositoryException do
+        raise;
+      on E: Exception do
+        raise ERepositoryException.Create('Erro ao inserir tarefa. Detalhe: ' + E.Message);
     end;
   finally
     oQuery.Free;
@@ -176,12 +189,20 @@ begin
       if pNovoStatus = stConcluida then
         oQuery.Parameters.ParamByName('pDATA_CONCLUSAO').Value := Now
       else
-        oQuery.Parameters.ParamByName('pDATA_CONCLUSAO').Value;
+        oQuery.Parameters.ParamByName('pDATA_CONCLUSAO').Value := Null;
 
       oQuery.ExecSQL;
 
+      if oQuery.RowsAffected = 0 then
+        raise ENotFoundException.Create('Tarefa nao encontrada.');
+
     except
-      raise Exception.Create('Erro ao atualizar status da tarefa.');
+      on E: ENotFoundException do
+        raise;
+      on E: ERepositoryException do
+        raise;
+      on E: Exception do
+        raise ERepositoryException.Create('Erro ao atualizar status da tarefa. Detalhe: ' + E.Message);
     end;
     
   finally
@@ -207,8 +228,16 @@ begin
 
       oQuery.ExecSQL;
 
+      if oQuery.RowsAffected = 0 then
+        raise ENotFoundException.Create('Tarefa nao encontrada.');
+
     except
-      raise Exception.Create('Erro ao remover tarefa.');
+      on E: ENotFoundException do
+        raise;
+      on E: ERepositoryException do
+        raise;
+      on E: Exception do
+        raise ERepositoryException.Create('Erro ao remover tarefa. Detalhe: ' + E.Message);
     end;
   finally
     oQuery.Free;
@@ -220,9 +249,9 @@ function TTarefaRepository.TotalTarefas: Integer;
 var
   oQuery: TADOQuery;
   oConexao: TADOConnection;
-  nTotalTarefas: Integer;
+  TotalTarefas: Integer;
 begin
-  nTotalTarefas := 0;
+  TotalTarefas := 0;
   oConexao := FConexaoFactory.GetConnection;
   oQuery := TADOQuery.Create(nil);
 
@@ -233,12 +262,15 @@ begin
 
       oQuery.Open;
 
-      nTotalTarefas := oQuery.FieldByName('TOTAL').AsInteger;
+      TotalTarefas := oQuery.FieldByName('TOTAL').AsInteger;
 
-      Result := nTotalTarefas;
+      Result := TotalTarefas;
 
     except
-      raise Exception.Create('Erro ao consultar total de tarefas.');
+      on E: ERepositoryException do
+        raise;
+      on E: Exception do
+        raise ERepositoryException.Create('Erro ao consultar total de tarefas. Detalhe: ' + E.Message);
     end;
   finally
     oQuery.Free;
@@ -250,9 +282,9 @@ function TTarefaRepository.MediaPrioridadePendentes: Double;
 var
   oQuery: TADOQuery;
   oConexao: TADOConnection;
-  nMedia: Double;
+  Media: Double;
 begin
-  nMedia := 0;
+  Media := 0;
   oConexao := FConexaoFactory.GetConnection;
   oQuery := TADOQuery.Create(nil);
 
@@ -268,12 +300,15 @@ begin
       oQuery.Open;
 
       if not oQuery.FieldByName('MEDIA').IsNull then
-        nMedia := oQuery.FieldByName('MEDIA').AsFloat;
+        Media := oQuery.FieldByName('MEDIA').AsFloat;
 
-      Result := nMedia;
+      Result := Media;
 
     except
-      raise Exception.Create('Erro ao consultar média de prioridade.');
+      on E: ERepositoryException do
+        raise;
+      on E: Exception do
+        raise ERepositoryException.Create('Erro ao consultar media de prioridade. Detalhe: ' + E.Message);
     end;
     
   finally
@@ -286,9 +321,9 @@ function TTarefaRepository.TarefasConcluidasUltimos7Dias: Integer;
 var
   oQuery: TADOQuery;
   oConexao: TADOConnection;
-  nQuantidade: Integer;
+  Quantidade: Integer;
 begin
-  nQuantidade := 0;
+  Quantidade := 0;
   oConexao := FConexaoFactory.GetConnection;
   oQuery := TADOQuery.Create(nil);
 
@@ -304,12 +339,15 @@ begin
 
       oQuery.Open;
 
-      nQuantidade := oQuery.FieldByName('TOTAL').AsInteger;
+      Quantidade := oQuery.FieldByName('TOTAL').AsInteger;
 
-      Result := nQuantidade;
+      Result := Quantidade;
 
     except
-      raise Exception.Create('Erro ao consultar tarefas concluídas.');
+      on E: ERepositoryException do
+        raise;
+      on E: Exception do
+        raise ERepositoryException.Create('Erro ao consultar tarefas concluidas. Detalhe: ' + E.Message);
     end;
   finally
     oQuery.Free;

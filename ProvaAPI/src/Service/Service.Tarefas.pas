@@ -7,7 +7,8 @@ uses
   System.Generics.Collections,
   Model.Tarefas,
   Service.Tarefas.Contracts,
-  Repository.Tarefas.Contracts;
+  Repository.Tarefas.Contracts,
+  Api.Exceptions;
 
 type
   /// <summary>
@@ -70,13 +71,16 @@ end;
 procedure TTarefaService.Inserir(pTarefa: TTarefa);
 begin
   if Trim(pTarefa.Titulo).IsEmpty then
-    raise Exception.Create('O título da tarefa é obrigatório.');
+    raise EValidationException.Create('O titulo da tarefa e obrigatorio.');
 
   if Trim(pTarefa.Descricao).IsEmpty then
-    raise Exception.Create('A descrição da tarefa é obrigatória.');
+    raise EValidationException.Create('A descricao da tarefa e obrigatoria.');
 
   pTarefa.DataCriacao := Now;
-  pTarefa.Status := stPendente;
+  if pTarefa.Status = stConcluida then
+    pTarefa.DataConclusao := Now
+  else
+    pTarefa.DataConclusao := 0;
 
   FRepository.Inserir(pTarefa);
 end;
@@ -84,7 +88,7 @@ end;
 procedure TTarefaService.AtualizarStatus(pId: Integer; pNovoStatus: TStatusTarefa);
 begin
   if pId <= 0 then
-    raise Exception.Create('Id da tarefa inválido.');
+    raise EValidationException.Create('Id da tarefa invalido.');
 
   FRepository.AtualizarStatus(pId, pNovoStatus);
 end;
@@ -92,7 +96,7 @@ end;
 procedure TTarefaService.Remover(pId: Integer);
 begin
   if pId <= 0 then
-    raise Exception.Create('Id da tarefa inválido.');
+    raise EValidationException.Create('Id da tarefa invalido.');
 
   FRepository.Remover(pId);
 end;
