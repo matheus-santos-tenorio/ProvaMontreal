@@ -12,13 +12,6 @@ Projeto de **serviço REST em Delphi (Horse)** com **SQL Server** e **aplicaçã
 1. Execute o script [`prova_base_tabela.sql`](prova_base_tabela.sql) no SQL Server (cria o banco `prova` e a tabela `tarefas`, se ainda não existirem).
 2. Ajuste a *connection string* em `ProvaAPI/src/Utils/uConstantes.pas` (`DB_CONNECTION_STRING`) se servidor, instância ou autenticação forem diferentes.
 
-`PRIORIDADE` e `STATUS` gravados na tabela usam intervalos **1..5** e **1..3** (não há valor 0 semântico para esses campos). Se você já tinha dados da versão antiga (0..4 e 0..2), rode **uma vez** no banco:
-
-```sql
-UPDATE dbo.tarefas SET PRIORIDADE = PRIORIDADE + 1 WHERE PRIORIDADE BETWEEN 0 AND 4;
-UPDATE dbo.tarefas SET STATUS = STATUS + 1 WHERE STATUS BETWEEN 0 AND 2;
-```
-
 ## Configuração da API (`ProvaAPI`)
 
 | Constante | Descrição |
