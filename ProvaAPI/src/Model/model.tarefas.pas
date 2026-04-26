@@ -7,14 +7,14 @@ uses
 
 type
   /// <summary>
-  /// Enum para o status da tarefa
+  /// Status persistido: 1=Pendente, 2=Em andamento, 3=Concluida (enum com valor inicial 1).
   /// </summary>
-  TStatusTarefa = (stPendente, stEmAndamento, stConcluida);
+  TStatusTarefa = (stPendente = 1, stEmAndamento, stConcluida);
 
   /// <summary>
-  /// Enum para as prioridades
+  /// Prioridade persistida: 1=Baixa .. 5=Critica.
   /// </summary>
-  TPrioridadeTarefa = (ptBaixa, ptMedia, ptAlta, ptUrgente, ptCritica);
+  TPrioridadeTarefa = (ptBaixa = 1, ptMedia, ptAlta, ptUrgente, ptCritica);
 
   /// <summary>
   /// Modelo de dominio da tarefa (alinhado a tabela TAREFAS na API).
@@ -40,13 +40,11 @@ type
     property DataCriacao: TDateTime read FDataCriacao write FDataCriacao;
     property DataConclusao: TDateTime read FDataConclusao write FDataConclusao;
 
-    class function toPrioridade(pPrioridadeTarefa: Integer): TPrioridadeTarefa; static;
-    class function toStatus(pStatusTarefa: Integer): TStatusTarefa; static;
+    class function toPrioridade(const pPrioridade: Integer): TPrioridadeTarefa; static;
+    class function toStatus(const pStatus: Integer): TStatusTarefa; static;
   end;
 
 implementation
-
-{ TTask }
 
 constructor TTarefa.Create;
 begin
@@ -61,26 +59,25 @@ begin
   FDataConclusao := 0;
 end;
 
-class function TTarefa.toPrioridade(
-  pPrioridadeTarefa: Integer): TPrioridadeTarefa;
+class function TTarefa.toPrioridade(const pPrioridade: Integer): TPrioridadeTarefa;
 begin
-  case pPrioridadeTarefa of
-    0: Result := ptBaixa;
-    1: Result := ptMedia;
-    2: Result := ptAlta;
-    3: Result := ptUrgente;
-    4: Result := ptCritica;
+  case pPrioridade of
+    1: Result := ptBaixa;
+    2: Result := ptMedia;
+    3: Result := ptAlta;
+    4: Result := ptUrgente;
+    5: Result := ptCritica;
   else
     raise Exception.Create('Prioridade invalida');
   end;
 end;
 
-class function TTarefa.toStatus(pStatusTarefa: Integer): TStatusTarefa;
+class function TTarefa.toStatus(const pStatus: Integer): TStatusTarefa;
 begin
-  case pStatusTarefa of
-    0: Result := stPendente;
-    1: Result := stEmAndamento;
-    2: Result := stConcluida;
+  case pStatus of
+    1: Result := stPendente;
+    2: Result := stEmAndamento;
+    3: Result := stConcluida;
   else
     raise Exception.Create('Status invalido');
   end;

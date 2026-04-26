@@ -1,6 +1,6 @@
 -- Criacao do banco e da tabela TAREFAS (SQL Server)
--- PRIORIDADE: 0 Baixa, 1 Media, 2 Alta, 3 Urgente, 4 Critica
--- STATUS: 0 Pendente, 1 Em andamento, 2 Concluida
+-- PRIORIDADE: 1 Baixa, 2 Media, 3 Alta, 4 Urgente, 5 Critica (valores persistidos comecam em 1)
+-- STATUS: 1 Pendente, 2 Em andamento, 3 Concluida
 -- DATA_CONCLUSAO: preenchida pela API ao concluir tarefa; usada nas estatisticas (ultimos 7 dias)
 
 IF DB_ID(N'prova') IS NULL

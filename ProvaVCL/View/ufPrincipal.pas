@@ -101,7 +101,7 @@ end;
 
 procedure TfPrincipal.btnAltSalvarClick(Sender: TObject);
 begin
-  FRetorno := FPresenter.AtualizarStatus(StrToIntDef(edtAltCodigo.Text, 0), TTarefa.toStatus(rgAltStatus.ItemIndex));
+  FRetorno := FPresenter.AtualizarStatus(StrToIntDef(edtAltCodigo.Text, 0), TTarefa.toStatus(rgAltStatus.ItemIndex + 1));
 
   memAltMensagem.Text := FRetorno.Message;
   if FRetorno.Success then
@@ -129,8 +129,8 @@ begin
   try
     oTarefa.Titulo := edtCadTitulo.Text;
     oTarefa.Descricao := edtCadDescricao.Text;
-    oTarefa.Prioridade := TTarefa.toPrioridade(cmbCadPrioridade.ItemIndex);
-    oTarefa.Status := TTarefa.toStatus(rgCadStatus.ItemIndex);
+    oTarefa.Prioridade := TTarefa.toPrioridade(cmbCadPrioridade.ItemIndex + 1);
+    oTarefa.Status := TTarefa.toStatus(rgCadStatus.ItemIndex + 1);
 
     FRetorno := FPresenter.Inserir(oTarefa);
   finally

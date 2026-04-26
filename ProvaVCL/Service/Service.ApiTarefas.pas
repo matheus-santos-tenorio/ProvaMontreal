@@ -284,7 +284,7 @@ begin
     try
       Result :=
         'Total de Tarefas: ' + IntToStr(oJson.GetValue<Integer>('totalTarefas')) + sLineBreak +
-        'Media de Prioridade Pendentes: ' +
+        'Media de Prioridade com status "Pendentes": ' +
         FormatFloat('0.##', oJson.GetValue<Double>('mediaPrioridadePendentes')) + sLineBreak +
         'Tarefas Concluidas ultimos 7 Dias: ' +
         IntToStr(oJson.GetValue<Integer>('tarefasConcluidasUltimos7Dias'));

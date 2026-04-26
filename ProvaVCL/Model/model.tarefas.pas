@@ -6,19 +6,9 @@ uses
   System.SysUtils;
 
 type
-  /// <summary>
-  /// Enum para o status da tarefa
-  /// </summary>
-  TStatusTarefa = (stPendente, stEmAndamento, stConcluida);
+  TStatusTarefa = (stPendente = 1, stEmAndamento, stConcluida);
+  TPrioridadeTarefa = (ptBaixa = 1, ptMedia, ptAlta, ptUrgente, ptCritica);
 
-  /// <summary>
-  /// Enum para as prioridades
-  /// </summary>
-  TPrioridadeTarefa = (ptBaixa, ptMedia, ptAlta, ptUrgente, ptCritica);
-
-  /// <summary>
-  /// Modelo de dominio da tarefa (espelha contrato JSON da API).
-  /// </summary>
   TTarefa = class
   private
     FId: Integer;
@@ -40,15 +30,13 @@ type
     property DataCriacao: TDateTime read FDataCriacao write FDataCriacao;
     property DataConclusao: TDateTime read FDataConclusao write FDataConclusao;
 
-    class function toPrioridade(pPrioridadeTarefa: Integer): TPrioridadeTarefa; overload; static;
-    class function toPrioridade(pPrioridadeTarefa: TPrioridadeTarefa): String; overload; static;
-    class function toStatus(pStatusTarefa: Integer): TStatusTarefa; overload; static;
-    class function toStatus(pStatusTarefa: TStatusTarefa): String; overload; static;
+    class function toPrioridade(const pPrioridade: Integer): TPrioridadeTarefa; overload; static;
+    class function toPrioridade(const pPrioridade: TPrioridadeTarefa): string; overload; static;
+    class function toStatus(const pStatus: Integer): TStatusTarefa; overload; static;
+    class function toStatus(const pStatus: TStatusTarefa): string; overload; static;
   end;
 
 implementation
-
-{ TTask }
 
 constructor TTarefa.Create;
 begin
@@ -63,53 +51,47 @@ begin
   FDataConclusao := 0;
 end;
 
-class function TTarefa.toPrioridade(
-  pPrioridadeTarefa: Integer): TPrioridadeTarefa;
+class function TTarefa.toPrioridade(const pPrioridade: Integer): TPrioridadeTarefa;
 begin
-  case pPrioridadeTarefa of
-    0: Result := ptBaixa;
-    1: Result := ptMedia;
-    2: Result := ptAlta;
-    3: Result := ptUrgente;
-    4: Result := ptCritica;
+  case pPrioridade of
+    1: Result := ptBaixa;
+    2: Result := ptMedia;
+    3: Result := ptAlta;
+    4: Result := ptUrgente;
+    5: Result := ptCritica;
   else
     raise Exception.Create('Prioridade invalida');
   end;
 end;
 
-class function TTarefa.toPrioridade(
-  pPrioridadeTarefa: TPrioridadeTarefa): String;
+class function TTarefa.toPrioridade(const pPrioridade: TPrioridadeTarefa): string;
 begin
-  case pPrioridadeTarefa of
+  case pPrioridade of
     ptBaixa:   Result := 'Baixa';
     ptMedia:   Result := 'Media';
     ptAlta:    Result := 'Alta';
     ptUrgente: Result := 'Urgente';
     ptCritica: Result := 'Critica';
-  else
-    raise Exception.Create('Prioridade invalida');
   end;
 end;
 
-class function TTarefa.toStatus(pStatusTarefa: Integer): TStatusTarefa;
+class function TTarefa.toStatus(const pStatus: Integer): TStatusTarefa;
 begin
-  case pStatusTarefa of
-    0: Result := stPendente;
-    1: Result := stEmAndamento;
-    2: Result := stConcluida;
+  case pStatus of
+    1: Result := stPendente;
+    2: Result := stEmAndamento;
+    3: Result := stConcluida;
   else
     raise Exception.Create('Status invalido');
   end;
 end;
 
-class function TTarefa.toStatus(pStatusTarefa: TStatusTarefa): String;
+class function TTarefa.toStatus(const pStatus: TStatusTarefa): string;
 begin
-  case pStatusTarefa of
-    stPendente: Result := 'Pendente';
+  case pStatus of
+    stPendente:    Result := 'Pendente';
     stEmAndamento: Result := 'Em Andamento';
-    stConcluida: Result := 'Concluida';
-  else
-    raise Exception.Create('Status invalido');
+    stConcluida:   Result := 'Concluida';
   end;
 end;
 

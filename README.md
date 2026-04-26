@@ -12,6 +12,13 @@ Projeto de **serviço REST em Delphi (Horse)** com **SQL Server** e **aplicaçã
 1. Execute o script [`prova_base_tabela.sql`](prova_base_tabela.sql) no SQL Server (cria o banco `prova` e a tabela `tarefas`, se ainda não existirem).
 2. Ajuste a *connection string* em `ProvaAPI/src/Utils/uConstantes.pas` (`DB_CONNECTION_STRING`) se servidor, instância ou autenticação forem diferentes.
 
+`PRIORIDADE` e `STATUS` gravados na tabela usam intervalos **1..5** e **1..3** (não há valor 0 semântico para esses campos). Se você já tinha dados da versão antiga (0..4 e 0..2), rode **uma vez** no banco:
+
+```sql
+UPDATE dbo.tarefas SET PRIORIDADE = PRIORIDADE + 1 WHERE PRIORIDADE BETWEEN 0 AND 4;
+UPDATE dbo.tarefas SET STATUS = STATUS + 1 WHERE STATUS BETWEEN 0 AND 2;
+```
+
 ## Configuração da API (`ProvaAPI`)
 
 | Constante | Descrição |
@@ -26,8 +33,8 @@ Projeto de **serviço REST em Delphi (Horse)** com **SQL Server** e **aplicaçã
 | Método | Rota | Descrição |
 |--------|------|-----------|
 | GET | `/tarefas` | Lista todas as tarefas. |
-| POST | `/tarefas` | Corpo JSON: `titulo`, `descricao`, `prioridade` (inteiro). Campo opcional `status` (0..2); se omitido, usa Pendente. Se `status` for Concluída, grava `DATA_CONCLUSAO`. |
-| PUT | `/tarefas/:id/status` | Corpo JSON: `status` (**número**: 0 = Pendente, 1 = Em andamento, 2 = Concluída). |
+| POST | `/tarefas` | Corpo JSON: `titulo`, `descricao`, `prioridade` (inteiro 1..5). Campo opcional `status` (1..3); se omitido, usa Pendente (1). Se `status` for Concluída (3), grava `DATA_CONCLUSAO`. |
+| PUT | `/tarefas/:id/status` | Corpo JSON: `status` (**número**: 1 = Pendente, 2 = Em andamento, 3 = Concluída). |
 | DELETE | `/tarefas/:id` | Remove por `id`. |
 | GET | `/tarefas/estatisticas` | Total de tarefas, média de prioridade das pendentes e concluídas nos últimos 7 dias. |
 
@@ -40,8 +47,8 @@ Respostas de erro seguem o formato `{"error":"mensagem"}`, com HTTP 400, 401, 40
 | `ID` | INT IDENTITY PK | Identificador. |
 | `TITULO` | NVARCHAR(200) | Obrigatório. |
 | `DESCRICAO` | NVARCHAR(1000) | Obrigatório. |
-| `PRIORIDADE` | INT | 0..4 — ver comentários em `prova_base_tabela.sql`. |
-| `STATUS` | INT | 0..2 — ver comentários em `prova_base_tabela.sql`. |
+| `PRIORIDADE` | INT | 1..5 — ver comentários em `prova_base_tabela.sql`. |
+| `STATUS` | INT | 1..3 — ver comentários em `prova_base_tabela.sql`. |
 | `DATA_CRIACAO` | DATETIME2 | Preenchida na inserção. |
 | `DATA_CONCLUSAO` | DATETIME2 NULL | Preenchida ao concluir; base do filtro “últimos 7 dias”. |
 

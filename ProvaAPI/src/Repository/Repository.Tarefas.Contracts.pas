@@ -8,7 +8,7 @@ uses
 
 type
   /// <summary>
-  /// Interface responsavel por definir o contrato de persistência e consulta das tarefas.
+  /// Interface responsavel por definir o contrato de persistencia e consulta das tarefas.
   /// </summary>
   ITarefaRepository = interface ['{3F4ECABC-7573-4082-AE44-B805E3D0E818}']
     /// <summary>
@@ -28,17 +28,17 @@ type
     /// </summary>
     procedure Remover(pId: Integer);
     /// <summary>
-    /// Retorna o número total de tarefas.
+    /// Retorna o numero total de tarefas.
     /// </summary>
     function TotalTarefas: Integer;
     /// <summary>
-    /// Retorna a média de prioridade
+    /// Retorna a media de prioridade
     /// das tarefas pendentes.
     /// </summary>
     function MediaPrioridadePendentes: Double;
     /// <summary>
     /// Retorna a quantidade de tarefas
-    /// concluídas nos últimos 7 dias.
+    /// concluidas nos ultimos 7 dias.
     /// </summary>
     function TarefasConcluidasUltimos7Dias: Integer;
   end;
